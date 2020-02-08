@@ -1,2 +1,2 @@
 # LearnOpenGL.NET
-Going through https://learnopengl.com in C#
+This is a my go at https://learnopengl.com using the [Silk.NET](https://github.com/Ultz/Silk.NET).
