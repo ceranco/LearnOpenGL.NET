@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Utils\Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Silk.NET" Version="1.0.0-preview4" />
+    <PackageReference Include="StbImageSharp" Version="2.22.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="container.jpg" />
+    <EmbeddedResource Include="awesomeface.png" />
+  </ItemGroup>
+
+</Project>

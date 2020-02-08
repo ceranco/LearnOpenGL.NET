@@ -1,0 +1,47 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Transformations",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-transformations",
+            "program": "${workspaceFolder}/Transformations/bin/Debug/netcoreapp3.0/Transformations.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Transformations",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Textures",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-textures",
+            "program": "${workspaceFolder}/Textures/bin/Debug/netcoreapp3.0/Textures.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Textures",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "HelloTriangle",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/HelloTriangle/bin/Debug/netcoreapp3.0/HelloTriangle.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/HelloTriangle",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}
