@@ -1,3 +1,5 @@
+using System;
+
 namespace Utils
 {
     public static class FloatExtensions
@@ -9,5 +11,7 @@ namespace Utils
             if (value > inclusiveMaximum) { return inclusiveMaximum; }
             return value;
         }
+
+        public static float ToRadians(this float deg) => deg * MathF.PI / 180.0f;
     }
 }
