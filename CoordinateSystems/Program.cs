@@ -14,18 +14,18 @@ namespace CoordinateSystems
     {
         private static readonly float[] vertices =
         {
-            // Position             // Color
-           -0.5f, -0.5f, 0.0f,      1.0f, 0.0f, 0.0f,
-            0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,
-            0.5f,  0.5f, 0.0f,      0.0f, 0.0f, 1.0f,
-           -0.5f,  0.5f, 0.0f,      1.0f, 1.0f, 1.0f,
+            // Position             // Texel
+           -0.5f, -0.5f, 0.0f,      0.0f, 0.0f,
+            0.5f, -0.5f, 0.0f,      1.0f, 0.0f,
+            0.5f,  0.5f, 0.0f,      1.0f, 1.0f,
+           -0.5f,  0.5f, 0.0f,      0.0f, 1.0f,
         };
         private static readonly string vertexShaderSource = @"
             #version 330 core
             layout(location = 0) in vec3 aPosition;
-            layout(location = 1) in vec3 aColor;
+            layout(location = 1) in vec2 aTexel;
 
-            out vec3 color;
+            out vec2 texel;
 
             uniform mat4 model;
             uniform mat4 view;
@@ -34,17 +34,19 @@ namespace CoordinateSystems
             void main()
             {
                 gl_Position = projection * view * model * vec4(aPosition, 1.0);
-                color = aColor;
+                texel = aTexel;
             }
         ";
         private static readonly string fragmentShaderSource = @"
             #version 330 core
-            in vec3 color;
+            in vec2 texel;
             out vec4 fColor;
+
+            uniform sampler2D tex;
 
             void main()
             {
-                fColor = vec4(color, 1.0);
+                fColor = texture(tex, texel);
             }
         ";
 
@@ -58,6 +60,7 @@ namespace CoordinateSystems
             GL gl = null;
             uint vbo = 0;
             uint vao = 0;
+            uint tex = 0;
             Shader shader = null;
             Matrix4x4 model = Matrix4x4.Identity;
             Matrix4x4 view = Matrix4x4.Identity;
@@ -77,6 +80,27 @@ namespace CoordinateSystems
                 // retrieve the gl instance
                 gl = GL.GetApi();
 
+                // set-up the texture
+                tex = gl.GenTexture();
+                gl.ActiveTexture(GLEnum.Texture0);
+
+                gl.BindTexture(GLEnum.Texture2D, tex);
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Linear);
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
+
+                var image = ImageUtils.LoadEmbeddedImage("container.jpg");
+                unsafe
+                {
+                    fixed (void* ptr = image.Data)
+                    {
+                        gl.TexImage2D(GLEnum.Texture2D, 0, (int)image.SourceComp.ToEnum(), (uint)image.Width,
+                        (uint)image.Height, 0, image.SourceComp.ToEnum(), GLEnum.UnsignedByte, ptr);
+                    }
+                }
+                gl.GenerateMipmap(GLEnum.Texture2D);
+
                 // set-up the vbo
                 vbo = gl.GenBuffer();
                 gl.BindBuffer(GLEnum.ArrayBuffer, vbo);
@@ -93,15 +117,16 @@ namespace CoordinateSystems
                 gl.BindVertexArray(vao);
                 unsafe
                 {
-                    const uint stride = 6 * sizeof(float);
+                    const uint stride = 5 * sizeof(float);
                     gl.VertexAttribPointer(0, 3, GLEnum.Float, false, stride, (void*)0);
-                    gl.VertexAttribPointer(1, 3, GLEnum.Float, false, stride, (void*)(3 * sizeof(float)));
+                    gl.VertexAttribPointer(1, 2, GLEnum.Float, false, stride, (void*)(3 * sizeof(float)));
                 }
                 gl.EnableVertexAttribArray(0);
                 gl.EnableVertexAttribArray(1);
 
                 // set-up the shader
                 shader = new Shader(vertexShaderSource, fragmentShaderSource, gl);
+                shader.Set(nameof(tex), 0);
                 model = Matrix4x4.CreateRotationX(-55.0f.ToRadians());
                 view = Matrix4x4.CreateTranslation(0, 0, -3.0f);
                 projection = Matrix4x4.CreatePerspectiveFieldOfView(45.0f.ToRadians(), 1.0f, 0.1f, 100.0f);
@@ -121,6 +146,8 @@ namespace CoordinateSystems
                 gl.Clear((uint)GLEnum.ColorBufferBit);
 
                 // draw
+                gl.ActiveTexture(GLEnum.Texture0);
+                gl.BindTexture(GLEnum.Texture2D, tex);
                 shader.Use();
                 gl.BindVertexArray(vao);
                 gl.DrawArrays(GLEnum.TriangleFan, 0, 4);

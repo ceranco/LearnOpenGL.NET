@@ -14,4 +14,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="container.jpg" />
+    <EmbeddedResource Include="awesomeface.png" />
+  </ItemGroup>
+
 </Project>
