@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "CoordinateSystems",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-coordinate-systems",
+            "program": "${workspaceFolder}/CoordinateSystems/bin/Debug/netcoreapp3.0/CoordinateSystems.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/CoordinateSystems",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
             "name": "Transformations",
             "type": "coreclr",
             "request": "launch",
