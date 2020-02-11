@@ -42,13 +42,19 @@ namespace CoordinateSystems
             in vec2 texel;
             out vec4 fColor;
 
-            uniform sampler2D tex;
+            uniform sampler2D texture1;
+            uniform sampler2D texture2;
 
             void main()
             {
-                fColor = texture(tex, texel);
+                fColor = mix(texture(texture1, texel), texture(texture2, vec2(texel.x, -texel.y)), 0.2);
             }
         ";
+        private static readonly string[] texture_names = 
+        {
+            "container.jpg",
+            "awesomeface.png"
+        };
 
         private static void Main(string[] args)
         {
@@ -60,7 +66,7 @@ namespace CoordinateSystems
             GL gl = null;
             uint vbo = 0;
             uint vao = 0;
-            uint tex = 0;
+            uint[] textures = new uint[texture_names.Length];
             Shader shader = null;
             Matrix4x4 model = Matrix4x4.Identity;
             Matrix4x4 view = Matrix4x4.Identity;
@@ -80,26 +86,31 @@ namespace CoordinateSystems
                 // retrieve the gl instance
                 gl = GL.GetApi();
 
-                // set-up the texture
-                tex = gl.GenTexture();
-                gl.ActiveTexture(GLEnum.Texture0);
+                // set-up the textures
+                gl.GenTextures((uint)textures.Length, textures);
 
-                gl.BindTexture(GLEnum.Texture2D, tex);
-                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
-                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
-                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Linear);
-                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
-
-                var image = ImageUtils.LoadEmbeddedImage("container.jpg");
-                unsafe
+                for (int i = 0; i < textures.Length; i++)
                 {
-                    fixed (void* ptr = image.Data)
+                    var texture = textures[i];
+                    gl.ActiveTexture((GLEnum)((int)GLEnum.Texture0 + i));
+                    gl.BindTexture(GLEnum.Texture2D, texture);
+
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Linear);
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
+
+                    var image = ImageUtils.LoadEmbeddedImage(texture_names[i]);
+                    unsafe
                     {
-                        gl.TexImage2D(GLEnum.Texture2D, 0, (int)image.SourceComp.ToEnum(), (uint)image.Width,
-                        (uint)image.Height, 0, image.SourceComp.ToEnum(), GLEnum.UnsignedByte, ptr);
+                        fixed (void* ptr = image.Data)
+                        {
+                            gl.TexImage2D(GLEnum.Texture2D, 0, (int)image.SourceComp.ToEnum(), (uint)image.Width,
+                            (uint)image.Height, 0, image.SourceComp.ToEnum(), GLEnum.UnsignedByte, ptr);
+                        }
                     }
+                    gl.GenerateMipmap(GLEnum.Texture2D);
                 }
-                gl.GenerateMipmap(GLEnum.Texture2D);
 
                 // set-up the vbo
                 vbo = gl.GenBuffer();
@@ -126,7 +137,10 @@ namespace CoordinateSystems
 
                 // set-up the shader
                 shader = new Shader(vertexShaderSource, fragmentShaderSource, gl);
-                shader.Set(nameof(tex), 0);
+                for (int i = 0; i < textures.Length; i++)
+                {
+                    shader.Set($"texture{i + 1}", i);
+                }
                 model = Matrix4x4.CreateRotationX(-55.0f.ToRadians());
                 view = Matrix4x4.CreateTranslation(0, 0, -3.0f);
                 projection = Matrix4x4.CreatePerspectiveFieldOfView(45.0f.ToRadians(), 1.0f, 0.1f, 100.0f);
@@ -146,8 +160,12 @@ namespace CoordinateSystems
                 gl.Clear((uint)GLEnum.ColorBufferBit);
 
                 // draw
-                gl.ActiveTexture(GLEnum.Texture0);
-                gl.BindTexture(GLEnum.Texture2D, tex);
+                for (int i = 0; i < textures.Length; i++)
+                {
+                    var texture = textures[i];
+                    gl.ActiveTexture((GLEnum)((int)GLEnum.Texture0 + i));
+                    gl.BindTexture(GLEnum.Texture2D, texture);
+                }
                 shader.Use();
                 gl.BindVertexArray(vao);
                 gl.DrawArrays(GLEnum.TriangleFan, 0, 4);
