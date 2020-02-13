@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
@@ -110,16 +111,28 @@ namespace CoordinateSystems
             Matrix4x4 view = Matrix4x4.Identity;
             Matrix4x4 projection = Matrix4x4.Identity;
             var stopwatch = new Stopwatch();
+            var keyState = new Dictionary<Key, bool>
+            {
+                { Key.Right, false },
+                { Key.Left, false },
+                { Key.A, false },
+                { Key.D, false },
+            };
 
             window.Load += () =>
             {
                 // register key-down handler
-                window.CreateInput().Keyboards.ForEach(kbd => kbd.KeyDown += (kbd, key, code) =>
+                window.CreateInput().Keyboards.ForEach(kbd =>
                 {
-                    if (key == Key.Escape)
+                    kbd.KeyDown += (kbd, key, code) =>
                     {
-                        window.Close();
-                    }
+                        if (key == Key.Escape)
+                        {
+                            window.Close();
+                        }
+                        keyState[key] = true;
+                    };
+                    kbd.KeyUp += (kbd, key, code) => keyState[key] = false;
                 });
 
                 // retrieve the gl instance
@@ -197,6 +210,25 @@ namespace CoordinateSystems
                 var angle = (float)stopwatch.Elapsed.TotalSeconds * 35.0f.ToRadians();
                 var quat = Quaternion.CreateFromAxisAngle(axis, angle);
                 model = Matrix4x4.CreateFromQuaternion(quat);
+
+                if (keyState[Key.Right] || keyState[Key.Left] && !(keyState[Key.Right] && keyState[Key.Left]))
+                {
+                    float delta = 0.01f * (keyState[Key.Right] ? -1 : 1);
+                    Matrix4x4.Decompose(view, out var scale, out var rotation, out var translation);
+                    view = Matrix4x4.CreateScale(scale) *
+                            Matrix4x4.CreateFromQuaternion(rotation) *
+                            Matrix4x4.CreateTranslation(translation.X + delta, translation.Y, translation.Z);
+                }
+
+                if (keyState[Key.A] || keyState[Key.D] && !(keyState[Key.A] && keyState[Key.D]))
+                {
+                    float delta = 0.01f * (keyState[Key.A] ? -1 : 1);
+                    Matrix4x4.Decompose(view, out var scale, out var rotation, out var translation);
+                    view = Matrix4x4.CreateScale(scale) *
+                            Matrix4x4.CreateFromQuaternion(rotation) *
+                            Matrix4x4.CreateTranslation(translation) *
+                            Matrix4x4.CreateRotationY(delta);
+                }
 
                 shader.Set(nameof(model), ref model);
                 shader.Set(nameof(view), ref view);
