@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using Silk.NET.Input;
@@ -15,10 +16,47 @@ namespace CoordinateSystems
         private static readonly float[] vertices =
         {
             // Position             // Texel
-           -0.5f, -0.5f, 0.0f,      0.0f, 0.0f,
-            0.5f, -0.5f, 0.0f,      1.0f, 0.0f,
-            0.5f,  0.5f, 0.0f,      1.0f, 1.0f,
-           -0.5f,  0.5f, 0.0f,      0.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,     0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,     1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,     1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,     1.0f, 1.0f,
+           -0.5f,  0.5f, -0.5f,     0.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,     0.0f, 0.0f,
+
+           -0.5f, -0.5f,  0.5f,     0.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,     1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,     1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,     1.0f, 1.0f,
+           -0.5f,  0.5f,  0.5f,     0.0f, 1.0f,
+           -0.5f, -0.5f,  0.5f,     0.0f, 0.0f,
+
+           -0.5f,  0.5f,  0.5f,     1.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,     1.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,     0.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,     0.0f, 1.0f,
+           -0.5f, -0.5f,  0.5f,     0.0f, 0.0f,
+           -0.5f,  0.5f,  0.5f,     1.0f, 0.0f,
+
+            0.5f,  0.5f,  0.5f,     1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,     1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,     0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,     0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,     0.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,     1.0f, 0.0f,
+
+           -0.5f, -0.5f, -0.5f,     0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,     1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,     1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,     1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,     0.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,     0.0f, 1.0f,
+
+           -0.5f,  0.5f, -0.5f,     0.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,     1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,     1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,     1.0f, 0.0f,
+           -0.5f,  0.5f,  0.5f,     0.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,     0.0f, 1.0f
         };
         private static readonly string vertexShaderSource = @"
             #version 330 core
@@ -50,7 +88,7 @@ namespace CoordinateSystems
                 fColor = mix(texture(texture1, texel), texture(texture2, vec2(texel.x, -texel.y)), 0.2);
             }
         ";
-        private static readonly string[] texture_names = 
+        private static readonly string[] texture_names =
         {
             "container.jpg",
             "awesomeface.png"
@@ -71,6 +109,7 @@ namespace CoordinateSystems
             Matrix4x4 model = Matrix4x4.Identity;
             Matrix4x4 view = Matrix4x4.Identity;
             Matrix4x4 projection = Matrix4x4.Identity;
+            var stopwatch = new Stopwatch();
 
             window.Load += () =>
             {
@@ -141,15 +180,24 @@ namespace CoordinateSystems
                 {
                     shader.Set($"texture{i + 1}", i);
                 }
-                model = Matrix4x4.CreateRotationX(-55.0f.ToRadians());
+                // model = Matrix4x4.CreateRotationX(-55.0f.ToRadians());
                 view = Matrix4x4.CreateTranslation(0, 0, -3.0f);
                 projection = Matrix4x4.CreatePerspectiveFieldOfView(45.0f.ToRadians(), 1.0f, 0.1f, 100.0f);
 
-                // set the clear color
+                // setup gl stuff
                 gl.ClearColor(Color.DarkGoldenrod);
+                gl.Enable(GLEnum.DepthTest);
+
+                // start the stopwatch
+                stopwatch.Start();
             };
             window.Update += _ =>
             {
+                var axis = Vector3.Normalize(new Vector3(0.5f, 1.0f, 0.0f));
+                var angle = (float)stopwatch.Elapsed.TotalSeconds * 35.0f.ToRadians();
+                var quat = Quaternion.CreateFromAxisAngle(axis, angle);
+                model = Matrix4x4.CreateFromQuaternion(quat);
+
                 shader.Set(nameof(model), ref model);
                 shader.Set(nameof(view), ref view);
                 shader.Set(nameof(projection), ref projection);
@@ -157,7 +205,7 @@ namespace CoordinateSystems
             window.Render += _ =>
             {
                 // clear the buffer
-                gl.Clear((uint)GLEnum.ColorBufferBit);
+                gl.Clear((uint)GLEnum.ColorBufferBit | (uint)GLEnum.DepthBufferBit);
 
                 // draw
                 for (int i = 0; i < textures.Length; i++)
@@ -168,7 +216,7 @@ namespace CoordinateSystems
                 }
                 shader.Use();
                 gl.BindVertexArray(vao);
-                gl.DrawArrays(GLEnum.TriangleFan, 0, 4);
+                gl.DrawArrays(GLEnum.Triangles, 0, 36);
             };
             window.Resize += size =>
             {
