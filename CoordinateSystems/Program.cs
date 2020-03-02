@@ -147,13 +147,10 @@ namespace CoordinateSystems
                     gl.ActiveTexture((GLEnum)((int)GLEnum.Texture0 + i));
                     gl.BindTexture(GLEnum.Texture2D, texture);
 
-                    int repeat = (int)GLEnum.Repeat;
-                    int linear = (int)GLEnum.Linear;
-
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapS, ref repeat);
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapT, ref repeat);
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, ref linear);
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, ref linear);
+                    gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
+                    gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
+                    gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Linear);
+                    gl.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
 
                     var image = ImageUtils.LoadEmbeddedImage(texture_names[i]);
                     unsafe
