@@ -114,11 +114,7 @@ namespace Textures
                     gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, ref linear);
                     gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, ref linear);
 
-                    ImageResult image;
-                    using (var stream = assembly.GetManifestResourceStream($"{nameof(Textures)}.{textureSources[i]}"))
-                    {
-                        image = ImageResult.FromStream(stream);
-                    }
+                    ImageResult image = ImageUtils.LoadEmbeddedImage(textureSources[i]);
                     unsafe
                     {
                         fixed (void* ptr = image.Data)

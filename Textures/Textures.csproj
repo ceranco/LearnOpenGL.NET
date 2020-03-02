@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="Silk.NET" Version="1.0.0-preview5" />
-    <PackageReference Include="StbImageSharp" Version="2.22.4" />
   </ItemGroup>
 
   <ItemGroup>
