@@ -127,7 +127,7 @@ namespace Utils
         /// </summary>
         /// <param name="name">The name of the uniform.</param>
         /// <param name="value">The value to set.</param>
-        public void Set(string name, ref Matrix4x4 value)
+        public void Set(string name, in Matrix4x4 value)
         {
             Use();
             unsafe

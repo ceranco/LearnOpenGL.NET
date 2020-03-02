@@ -230,9 +230,9 @@ namespace CoordinateSystems
                             Matrix4x4.CreateRotationY(delta);
                 }
 
-                shader.Set(nameof(model), ref model);
-                shader.Set(nameof(view), ref view);
-                shader.Set(nameof(projection), ref projection);
+                shader.Set(nameof(model), in model);
+                shader.Set(nameof(view), in view);
+                shader.Set(nameof(projection), in projection);
             };
             window.Render += _ =>
             {

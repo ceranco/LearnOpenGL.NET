@@ -132,7 +132,7 @@ namespace Transformations
                 // set-up the shader
                 shader = new Shader(vertexShaderSource, fragmentShaderSource, gl);
                 shader.Set(nameof(tex), (int)GLEnum.Texture0);
-                shader.Set(nameof(transform), ref transform);
+                shader.Set(nameof(transform), in transform);
 
                 // set color
                 gl.ClearColor(Color.LightGray);
@@ -140,7 +140,7 @@ namespace Transformations
             window.Update += delta =>
             {
                 transform = Matrix4x4.CreateRotationZ((float)delta) * transform;
-                shader.Set(nameof(transform), ref transform);
+                shader.Set(nameof(transform), in transform);
             };
             window.Render += _ =>
             {
