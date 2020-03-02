@@ -106,16 +106,18 @@ namespace Textures
                     gl.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + i));
                     gl.BindTexture(GLEnum.Texture2D, textures[i]);
 
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)GLEnum.Linear);
-                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
+                    int repeat = (int)GLEnum.Repeat;
+                    int linear = (int)GLEnum.Linear;
+
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapS, ref repeat);
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapT, ref repeat);
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, ref linear);
+                    gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, ref linear);
 
                     ImageResult image;
-                    var loader = new ImageStreamLoader();
                     using (var stream = assembly.GetManifestResourceStream($"{nameof(Textures)}.{textureSources[i]}"))
                     {
-                        image = loader.Load(stream);
+                        image = ImageResult.FromStream(stream);
                     }
                     unsafe
                     {

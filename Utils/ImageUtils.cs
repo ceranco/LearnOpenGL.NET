@@ -13,12 +13,10 @@ namespace Utils
         public static ImageResult LoadEmbeddedImage(string path)
         {
             var assembly = Assembly.GetCallingAssembly();
-            ImageResult image;
             using (var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.{path}"))
             {
-                image = new ImageStreamLoader().Load(stream);
+                return ImageResult.FromStream(stream);
             }
-            return image;
         }
     }
 }

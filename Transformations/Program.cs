@@ -88,10 +88,13 @@ namespace Transformations
                 gl.ActiveTexture(GLEnum.Texture0);
                 gl.BindTexture(GLEnum.Texture2D, tex);
 
-                gl.TextureParameterI(tex, GLEnum.TextureWrapS, (int)GLEnum.Repeat);
-                gl.TextureParameterI(tex, GLEnum.TextureWrapT, (int)GLEnum.Repeat);
-                gl.TextureParameterI(tex, GLEnum.TextureMinFilter, (int)GLEnum.Linear);
-                gl.TextureParameterI(tex, GLEnum.TextureMagFilter, (int)GLEnum.Linear);
+                int repeat = (int)GLEnum.Repeat;
+                int linear = (int)GLEnum.Linear;
+
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapS, ref repeat);
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureWrapT, ref repeat);
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMinFilter, ref linear);
+                gl.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, ref linear);
 
                 ImageResult image = ImageUtils.LoadEmbeddedImage("wall.jpg");
                 unsafe
