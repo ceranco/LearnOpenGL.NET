@@ -167,13 +167,7 @@ namespace CoordinateSystems
                 // set-up the vbo
                 vbo = gl.GenBuffer();
                 gl.BindBuffer(GLEnum.ArrayBuffer, vbo);
-                unsafe
-                {
-                    fixed (void* ptr = vertices)
-                    {
-                        gl.BufferData(GLEnum.ArrayBuffer, (uint)vertices.Length * sizeof(float), ptr, GLEnum.StaticDraw);
-                    }
-                }
+                gl.BufferData(GLEnum.ArrayBuffer, (uint)vertices.Length * sizeof(float), new Span<float>(vertices), GLEnum.StaticDraw);
 
                 // set-up the vao
                 vao = gl.GenVertexArray();
